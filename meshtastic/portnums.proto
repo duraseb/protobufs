@@ -259,6 +259,13 @@ enum PortNum {
   ATAK_PLUGIN_V2 = 78;
 
   /*
+   * Signal-based routing protocol for community mesh networks.
+   * Exchanges neighbor link quality information for intelligent route selection.
+   * ENCODING: Protobuf (SignalRoutingInfo)
+   */
+  SIGNAL_ROUTING_APP = 88;
+
+  /*
    * GroupAlarm integration
    * Used for transporting GroupAlarm-related messages between Meshtastic nodes
    * and companion applications/services.
