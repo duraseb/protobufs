@@ -945,6 +945,11 @@ message ModuleConfig {
      * SignalRouting module configuration
      */
     SignalRoutingConfig signal_routing = 17;
+
+    /*
+     * NodeRateLimiter configuration
+     */
+    NodeRateLimiterConfig node_rate_limiter = 18;
   }
 
   /*
@@ -961,6 +966,45 @@ message ModuleConfig {
      * Default Unspecifed -> firmware uses TeamMember
      */
     MemberRole role = 2;
+  }
+
+  /*
+   * Configuration for the NodeRateLimiter module (per-node inbound packet rate limiting).
+   * All numeric fields default to 0, which means "use firmware default".
+   */
+  message NodeRateLimiterConfig {
+    /*
+     * Master enable/disable for per-node rate limiting.
+     * When false (and has_node_rate_limiter is set), rate limiting is disabled entirely.
+     * Default (no config): rate limiting is always enabled.
+     */
+    bool enabled = 1;
+
+    /*
+     * Rate limit window in seconds.
+     * Packets received above the threshold within this window trigger rate limiting.
+     * The node must then go quiet for a full window before the limit is lifted.
+     * 0 = use firmware default (90 s).
+     */
+    uint32 window_secs = 2;
+
+    /*
+     * Packet threshold for the TEXT bucket (TEXT_MESSAGE_APP / TEXT_MESSAGE_COMPRESSED_APP).
+     * 0 = use firmware default (30 packets per window).
+     */
+    uint32 text_threshold = 3;
+
+    /*
+     * Packet threshold for the ROUTING bucket (ROUTING_APP, SIGNAL_ROUTING_APP, TRACEROUTE_APP).
+     * 0 = use firmware default (10 packets per window).
+     */
+    uint32 routing_threshold = 4;
+
+    /*
+     * Packet threshold for the OTHER bucket (all other portnums, including undecoded packets).
+     * 0 = use firmware default (4 packets per window).
+     */
+    uint32 other_threshold = 5;
   }
 
   /*
