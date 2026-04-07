@@ -940,6 +940,11 @@ message ModuleConfig {
      * TAK team/role configuration for TAK_TRACKER
      */
     TAKConfig tak = 16;
+
+    /*
+     * SignalRouting module configuration
+     */
+    SignalRoutingConfig signal_routing = 17;
   }
 
   /*
@@ -956,6 +961,63 @@ message ModuleConfig {
      * Default Unspecifed -> firmware uses TeamMember
      */
     MemberRole role = 2;
+  }
+
+  /*
+   * Configuration for the SignalRouting module (signal-based coordinated relay selection).
+   * All numeric fields default to 0, which means "use firmware default".
+   */
+  message SignalRoutingConfig {
+    /*
+     * Master enable/disable for signal-based routing.
+     * When false, SR falls back to standard flooding.
+     */
+    bool enabled = 1;
+
+    /*
+     * Enable T1 retransmit insurance: retransmit once if no relay heard within
+     * the worst-case ROUTER_LATE window.  Only fires if a hearsUs neighbor exists.
+     */
+    bool t1_retransmit_enabled = 2;
+
+    /*
+     * Topology broadcast interval in seconds.
+     * 0 = use firmware default (360 s).
+     */
+    uint32 topology_broadcast_secs = 3;
+
+    /*
+     * Minimum interval before a dirty-topology early broadcast in seconds.
+     * 0 = use firmware default (180 s).
+     */
+    uint32 dirty_broadcast_secs = 4;
+
+    /*
+     * Node aging TTL in seconds — nodes not heard within this window are
+     * removed from the routing graph.
+     * 0 = use firmware default (5400 s = 90 min).
+     */
+    uint32 node_ttl_secs = 5;
+
+    /*
+     * ETX threshold above which a link is treated as too poor for pre-coverage
+     * marking in relay decisions.
+     * 0.0 = use firmware default (7.0).
+     */
+    float poor_link_etx_threshold = 6;
+
+    /*
+     * Minimum ETX delta required to register a graph edge update as significant
+     * (and thus trigger a topology-dirty broadcast).
+     * 0.0 = use firmware default (0.5).
+     */
+    float etx_change_threshold = 7;
+
+    /*
+     * Maximum hop limit applied to SR topology broadcast packets.
+     * 0 = use firmware default (5).
+     */
+    uint32 broadcast_max_hops = 8;
   }
 }
 
