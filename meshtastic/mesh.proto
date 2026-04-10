@@ -2605,28 +2605,23 @@ message Neighbor {
  */
 message SignalRoutingInfo {
   /*
-   * Routing protocol version indicator for compatibility checking.
-   * Placed first to allow early rejection of incompatible versions.
-   * Allows future protocol upgrades while maintaining backward compatibility.
+   * V3 packed binary topology data. Uses field 5 to avoid wire collision with
+   * v2's field 3 (repeated SignalNeighbor). V2 packets are silently ignored
+   * (packed_neighbors will be empty, decoded as 0 neighbors).
+   *
+   * Self-describing format:
+   *   Byte 0: format_version (currently 1)
+   *   Byte 1: entry_size in bytes per neighbor (currently 8)
+   *   Byte 2: routing_version — protocol version for compatibility checking
+   *   Byte 3: topology_version — monotonic snapshot version for ordering updates
+   *   Byte 4: header_flags — bit 0 = signal_routing_active, bits 1-7 reserved
+   *   Byte 5+: neighbor entries, each entry_size bytes:
+   *     [4B node_id LE][1B rssi (int8)][1B snr (int8)][1B flags][1B etx_variance]
+   *     flags: bit 0 = signal_routing_active, bit 1 = hears_us, bits 2-7 reserved
+   *     etx_variance: EWMA of ETX fluctuation (value / 20.0 = ETX units)
+   * Forward-compatible: older parsers use entry_size to stride over unknown trailing fields.
    */
-  uint32 routing_version = 1;
-
-  /*
-   * Whether this node is actively participating in signal-based routing
-   */
-  bool signal_routing_active = 2;
-
-  /*
-   * List of directly heard neighbors with signal quality metrics.
-   * Limited to 11 neighbors per packet (fits 233 byte payload).
-   */
-  repeated SignalNeighbor neighbors = 3;
-
-  /*
-   * Topology snapshot version (monotonic timestamp).
-   * Ensures receivers process topology updates in order and avoid mixing old/new data.
-   */
-  uint32 topology_version = 4;
+  bytes packed_neighbors = 3;
 }
 
 /*

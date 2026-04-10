@@ -8,13 +8,10 @@
 *User.long_name max_size:40
 *User.short_name max_size:5
 
-# SignalNeighbor optimized for size: int8 for rssi/snr/variance to fit 11 neighbors per packet
-# Per-neighbor worst case: 20 bytes (18 data + 2 tag/length). 11*20 + 11 overhead = 231 <= 233
-*SignalNeighbor.rssi int_size:8
-*SignalNeighbor.snr int_size:8
-*SignalNeighbor.position_variance int_size:8
-*SignalRoutingInfo.neighbors max_count:11
-*SignalRoutingInfo.topology_version int_size:8
+# V3 packed binary format: 5B header + 8B/neighbor = up to 28 neighbors in 229 bytes
+# Field 5 avoids wire collision with v2's field 3 (repeated SignalNeighbor).
+# Protobuf envelope: tag(1) + length(2) = 3 bytes → 3 + 229 = 232 ≤ 233 DATA_PAYLOAD_LEN
+*SignalRoutingInfo.packed_neighbors max_size:229
 
 *RouteDiscovery.route max_count:8
 *RouteDiscovery.snr_towards max_count:8
